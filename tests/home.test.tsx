@@ -30,5 +30,5 @@ vi.mock('next/font/google', () => {
 
 test(`Home`, async () => {
   render(await Page());
-  expect(screen.getByText('The best Journal app, period.')).toBeTruthy();
+  expect(screen.getByText('The best journal app, period.')).toBeTruthy();
 });
