@@ -1,1 +1,1 @@
-Full-Stack Next.js web application with Open AI API integration.
+Full-stack Next.js web application with MongoDB and Open AI integration.
