@@ -3,14 +3,17 @@ function createURL(path) {
 }
 
 export async function createNewEntry() {
-  const response = await fetch(new Request(createURL('/api/journal')), {
-    method: 'POST',
-  });
+  try {
+    const response = await fetch(new Request(createURL('/api/journal')), {
+      method: 'POST',
+    });
 
-  if (response.ok) {
-    const data = await response.json();
-
-    return data.data;
+    if (response.ok) {
+      const data = await response.json();
+      return data;
+    }
+  } catch (error) {
+    console.log(error);
   }
 }
 

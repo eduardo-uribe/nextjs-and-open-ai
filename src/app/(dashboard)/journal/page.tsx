@@ -5,20 +5,33 @@ import NewEntryCard from '@/components/NewEntryCard';
 import EntryCard from '@/components/EntryCard';
 import Link from 'next/link';
 import Questions from '@/components/Questions';
+import clientPromise from '@/lib/mongodb';
 
 async function getEntries() {
-  const user = await getUserByClerkId();
+  try {
+    const user = await getUserByClerkId();
 
-  const entries = await prisma.journalEntry.findMany({
-    where: {
-      userId: user.id,
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
+    const client = await clientPromise;
+    const db = await client.db('jounral');
 
-  return entries;
+    const entries = await db
+      .collection('JournalEntry')
+      .find({ userId: `${user.id}` })
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    // replace with try catch and using mongodb custom query language
+    // const entries = await prisma.journalEntry.findMany({
+    //   where: {
+    //     userId: user.id,
+    //   },
+    //   orderBy: {
+    //     createdAt: 'desc',
+    //   },
+    // });
+
+    return entries;
+  } catch (error) {}
 }
 
 export default async function Page() {

@@ -1,6 +1,6 @@
 import { analyze } from '@/utils/ai';
 import { getUserByClerkId } from '@/utils/auth';
-import prisma from '@/utils/prisma';
+// import prisma from '@/utils/prisma';
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 
