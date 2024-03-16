@@ -14,14 +14,14 @@ export default function Editor({ entry }) {
     { name: 'Summary', value: summary },
     { name: 'Subject', value: subject },
     { name: 'Mood', value: mood },
-    { name: 'Negative', value: negative ? 'True' : 'False' },
+    { name: 'Negative', value: `${negative ? 'True' : 'False'}` },
   ];
 
   useAutosave({
     data: value,
     onSave: async function (updatedValue) {
       setIsLoading(true);
-      const data = await updateEntry(entry.id, updatedValue);
+      const data = await updateEntry(entry._id, updatedValue);
       setAnalysis(data.analysis);
       setIsLoading(false);
     },

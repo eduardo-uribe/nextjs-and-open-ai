@@ -1,38 +1,60 @@
 import { analyze } from '@/utils/ai';
 import { getUserByClerkId } from '@/utils/auth';
-import prisma from '@/utils/prisma';
 import { NextResponse } from 'next/server';
+import clientPromise from '@/lib/mongodb';
 import { revalidatePath } from 'next/cache';
+import { ObjectId } from 'mongodb';
+import { updateEntry } from '@/utils/api';
 
-export async function PATCH(request: Request, { params }) {
-  const { content } = await request.json();
+export async function PATCH(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  const content: string = await request.json();
   const user = await getUserByClerkId();
 
-  const updatedEntry = await prisma.journalEntry.update({
-    where: {
-      id: params.id,
+  const client = await clientPromise;
+  const db = client.db('journal');
+
+  const updatedEntry = await db.collection('JournalEntry').findOneAndUpdate(
+    {
+      _id: new ObjectId(params.id),
       userId: user.id,
     },
-    data: {
-      content,
+    {
+      $set: { content: content },
     },
-  });
+    {
+      returnDocument: 'after',
+    }
+  );
+
+  updatedEntry._id = updatedEntry._id.toString();
 
   const analysis = await analyze(updatedEntry.content);
 
-  const updated = await prisma.analysis.upsert({
-    where: {
-      entryId: updatedEntry.id,
+  const updatedAnalysis = await db.collection('Analysis').findOneAndUpdate(
+    {
+      entryId: updatedEntry._id,
     },
-    update: { ...analysis },
-    create: {
-      userId: user.id,
-      entryId: updatedEntry.id,
-      ...analysis,
+    {
+      $set: {
+        sentimentScore: analysis?.sentimentScore,
+        mood: analysis?.mood,
+        summary: analysis?.summary,
+        subject: analysis?.subject,
+        negative: analysis?.negative,
+        color: analysis?.color,
+      },
     },
-  });
+    {
+      upsert: true,
+      returnDocument: 'after',
+    }
+  );
+
+  updatedAnalysis._id = updatedAnalysis._id.toString();
 
   revalidatePath('/journal');
-
-  return NextResponse.json({ data: { ...updatedEntry, analysis: updated } });
+  return NextResponse.json({ ...updatedEntry, analysis: updatedAnalysis });
 }

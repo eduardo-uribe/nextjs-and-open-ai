@@ -1,16 +1,24 @@
 import { auth } from '@clerk/nextjs/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import clientPromise from '@/lib/mongodb';
 
 export async function getUserByClerkId() {
-  const { userId } = await auth();
+  try {
+    const { userId } = await auth();
 
-  const user = await prisma.user.findUniqueOrThrow({
-    where: {
-      clerkId: userId,
-    },
-  });
+    // replace with mongodb custom query language
+    const client = await clientPromise;
+    const db = client.db('journal');
 
-  return user;
+    const user = await db.collection('User').findOne({
+      clerkId: `${userId}`,
+    });
+
+    const userdata = {
+      id: user?._id.toString(),
+      clerkId: user.clerkId,
+      email: user.email,
+    };
+
+    return userdata;
+  } catch (error) {}
 }
