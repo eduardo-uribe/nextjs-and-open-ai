@@ -1,11 +1,11 @@
 import Editor from '@/components/Editor';
-import { getUserByClerkId } from '@/utils/auth';
+import { auth } from '@clerk/nextjs';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
 async function getEntry(id: string) {
   try {
-    const user = await getUserByClerkId();
+    const { userId }: { userId: string | null } = auth();
 
     const client = await clientPromise;
     const db = await client.db('journal');
@@ -16,7 +16,7 @@ async function getEntry(id: string) {
         {
           $match: {
             _id: new ObjectId(id),
-            userId: user.id,
+            userId,
           },
         },
         { $addFields: { entry_id: { $toString: '$_id' } } },

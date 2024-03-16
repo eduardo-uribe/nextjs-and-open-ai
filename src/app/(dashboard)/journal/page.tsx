@@ -1,5 +1,5 @@
 import { analyze } from '@/utils/ai';
-import { getUserByClerkId } from '../../../utils/auth';
+import { auth } from '@clerk/nextjs';
 import NewEntryCard from '@/components/NewEntryCard';
 import EntryCard from '@/components/EntryCard';
 import Link from 'next/link';
@@ -8,14 +8,14 @@ import clientPromise from '@/lib/mongodb';
 
 async function getEntries() {
   try {
-    const user = await getUserByClerkId();
+    const { userId }: { userId: string | null } = auth();
 
     const client = await clientPromise;
     const db = await client.db('journal');
 
     const entries = await db
       .collection('JournalEntry')
-      .find({ userId: user.id })
+      .find({ userId })
       .sort({ createdAt: -1 })
       .toArray();
 

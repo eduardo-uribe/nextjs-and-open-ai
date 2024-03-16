@@ -1,18 +1,18 @@
-import { getUserByClerkId } from '@/utils/auth';
-import { qa } from '@/utils/ai';
 import { NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs';
 import clientPromise from '@/lib/mongodb';
+import { qa } from '@/utils/ai';
 
 export async function POST(request: Request) {
   const { question } = await request.json();
-  const user = await getUserByClerkId();
+  const { userId }: { userId: string | null } = auth();
 
   const client = await clientPromise;
   const db = client.db('JournalEntry');
 
   const entries = await db
     .collection('JournalEntry')
-    .find({ userId: user.id })
+    .find({ userId })
     .toArray();
   // const entries = await prisma.journalEntry.findMany({
   //   where: {
