@@ -73,7 +73,7 @@ export async function qa(question, entries) {
   const embeddings = new OpenAIEmbeddings();
   const store = await MemoryVectorStore.fromDocuments(docs, embeddings);
   const relevantDocs = await store.similaritySearch(question);
-  const response = await chain.call({
+  const response = await chain.invoke({
     input_documents: relevantDocs,
     question,
   });
