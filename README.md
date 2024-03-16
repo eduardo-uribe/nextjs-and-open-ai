@@ -15,3 +15,4 @@ Tech stack:
 - LangChain: Framework for developing applications powered by language models.
 - Vitest: testing library
 - Clerk: authentication and authorization
+- zod:
