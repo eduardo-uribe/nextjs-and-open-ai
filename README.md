@@ -13,3 +13,5 @@ Tech stack:
 - MongoDB
 - OpenAI API
 - LangChain: Framework for developing applications powered by language models.
+- Vitest: testing library
+- Clerk: authentication and authorization

@@ -15,6 +15,8 @@ export async function POST(request: Request) {
 
     // create a journal entry document
     const doc = await db.collection('JournalEntry').insertOne({
+      createdAt: new Date(),
+      updatedAt: new Date(),
       userId,
       content: 'Write about your day',
     });
@@ -29,6 +31,8 @@ export async function POST(request: Request) {
     const analysis = await analyze(entry.content);
 
     await db.collection('Analysis').insertOne({
+      createdAt: new Date(),
+      updatedAt: new Date(),
       userId,
       entryId: entry._id,
       ...analysis,

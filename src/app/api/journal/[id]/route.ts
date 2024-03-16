@@ -22,7 +22,7 @@ export async function PATCH(
       userId,
     },
     {
-      $set: { content: content },
+      $set: { content: content, updatedAt: new Date() },
     },
     {
       returnDocument: 'after',
@@ -39,6 +39,7 @@ export async function PATCH(
     },
     {
       $set: {
+        updatedAt: new Date(),
         sentimentScore: analysis?.sentimentScore,
         mood: analysis?.mood,
         summary: analysis?.summary,
