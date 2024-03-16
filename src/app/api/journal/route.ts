@@ -5,9 +5,6 @@ import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
-// import prisma from '@/utils/prisma';
-
-// route handler
 export async function POST(request: Request) {
   try {
     const user = await getUserByClerkId();

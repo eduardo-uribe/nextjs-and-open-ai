@@ -1,4 +1,3 @@
-import prisma from '@/utils/prisma';
 import { analyze } from '@/utils/ai';
 import { getUserByClerkId } from '../../../utils/auth';
 import NewEntryCard from '@/components/NewEntryCard';
@@ -12,23 +11,13 @@ async function getEntries() {
     const user = await getUserByClerkId();
 
     const client = await clientPromise;
-    const db = await client.db('jounral');
+    const db = await client.db('journal');
 
     const entries = await db
       .collection('JournalEntry')
-      .find({ userId: `${user.id}` })
+      .find({ userId: user.id })
       .sort({ createdAt: -1 })
       .toArray();
-
-    // replace with try catch and using mongodb custom query language
-    // const entries = await prisma.journalEntry.findMany({
-    //   where: {
-    //     userId: user.id,
-    //   },
-    //   orderBy: {
-    //     createdAt: 'desc',
-    //   },
-    // });
 
     return entries;
   } catch (error) {}
@@ -46,8 +35,9 @@ export default async function Page() {
       <section className='grid grid-cols-3 gap-4'>
         <NewEntryCard />
         {entries.map(function (entry) {
+          entry._id = entry._id.toString();
           return (
-            <Link href={`/journal/${entry.id}`} key={entry.id}>
+            <Link href={`/journal/${entry._id}`} key={entry._id}>
               <EntryCard entry={entry} />
             </Link>
           );
