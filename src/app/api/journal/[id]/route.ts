@@ -1,5 +1,5 @@
 import { analyze } from '@/utils/ai';
-import { getUserByClerkId } from '@/utils/auth';
+import { auth } from '@clerk/nextjs';
 import { NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { revalidatePath } from 'next/cache';
@@ -11,7 +11,7 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   const content: string = await request.json();
-  const user = await getUserByClerkId();
+  const { userId }: { userId: string | null } = auth();
 
   const client = await clientPromise;
   const db = client.db('journal');
@@ -19,10 +19,10 @@ export async function PATCH(
   const updatedEntry = await db.collection('JournalEntry').findOneAndUpdate(
     {
       _id: new ObjectId(params.id),
-      userId: user.id,
+      userId,
     },
     {
-      $set: { content: content },
+      $set: { content: content, updatedAt: new Date() },
     },
     {
       returnDocument: 'after',
@@ -39,6 +39,7 @@ export async function PATCH(
     },
     {
       $set: {
+        updatedAt: new Date(),
         sentimentScore: analysis?.sentimentScore,
         mood: analysis?.mood,
         summary: analysis?.summary,
