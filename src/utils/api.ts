@@ -17,18 +17,17 @@ export async function createNewEntry() {
   }
 }
 
-export async function updateEntry(id, content) {
+export async function updateEntry(id: string, content) {
   const response = await fetch(
     new Request(createURL(`/api/journal/${id}`), {
       method: 'PATCH',
-      body: JSON.stringify({ content }),
+      body: JSON.stringify(content),
     })
   );
 
   if (response.ok) {
     const data = await response.json();
-
-    return data.data;
+    return data;
   }
 }
 

@@ -1,8 +1,7 @@
 import Editor from '@/components/Editor';
 import { getUserByClerkId } from '@/utils/auth';
 import clientPromise from '@/lib/mongodb';
-
-// import prisma from '@/utils/prisma';
+import { ObjectId } from 'mongodb';
 
 async function getEntry(id: string) {
   try {
@@ -16,35 +15,33 @@ async function getEntry(id: string) {
       .aggregate([
         {
           $match: {
-            _id: id,
+            _id: new ObjectId(id),
             userId: user.id,
           },
         },
+        { $addFields: { entry_id: { $toString: '$_id' } } },
         {
           $lookup: {
-            from: 'Analysis', // Name of the collection to join with
-            localField: '_id', // Field in the JournalEntry collection
-            foreignField: 'entryId', // Field in the analysis collection
-            as: 'analysis', // Name for the joined field in the result
+            from: 'Analysis',
+            localField: 'entry_id',
+            foreignField: 'entryId',
+            as: 'analysis',
           },
         },
-        { $unwind: '$analysis' }, // Flatten the array of analysis documents
+        {
+          $unwind: {
+            path: '$analysis',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
       ])
       .toArray();
 
-    // Now 'entry' will contain the populated 'analysis' field
+    const entrydata = entry[0];
+    entrydata._id = entrydata._id.toString();
+    entrydata.analysis._id = entrydata.analysis._id.toString();
 
-    // const entry = await prisma.journalEntry.findUnique({
-    //   where: {
-    //     id,
-    //     userId: user.id,
-    //   },
-    //   include: {
-    //     analysis: true,
-    //   },
-    // });
-
-    return entry;
+    return entrydata;
   } catch (error) {
     console.log(error);
   }
@@ -53,13 +50,9 @@ async function getEntry(id: string) {
 export default async function Page({ params }: { params: { id: string } }) {
   const entry = await getEntry(params.id);
 
-  console.log('JOURNAL/ID SERVER COMPONENT PAGE');
-  console.log(entry);
-
   return (
     <div className='h-full w-full'>
-      <p>TESTING THIS PAGE!</p>
-      {/* <Editor entry={entry} /> */}
+      <Editor entry={entry} />
     </div>
   );
 }
